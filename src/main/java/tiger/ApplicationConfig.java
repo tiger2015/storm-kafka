@@ -80,18 +80,4 @@ public class ApplicationConfig {
         consumer.subscribe(Arrays.asList(topics));
         return consumer;
     }
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory listenerContainerFactory() {
-
-        ConcurrentKafkaListenerContainerFactory containerFactory = new ConcurrentKafkaListenerContainerFactory();
-        containerFactory.setConcurrency(concurrency);
-        containerFactory.setBatchListener(batchListener);
-        containerFactory.setConsumerFactory(consumerFactory());
-        containerFactory.afterPropertiesSet();
-        return containerFactory;
-
-
-    }
-
-
 }

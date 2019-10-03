@@ -14,17 +14,12 @@ public class Application {
 
     static {
         CONTEXT = new AnnotationConfigApplicationContext(ApplicationConfig.class);
-       // CONTEXT.start();
     }
 
     public static void main(String[] args) throws InvalidTopologyException, AuthorizationException, AlreadyAliveException {
-       // KafkaMessageListener bean = CONTEXT.getBean(KafkaMessageListener.class);
-
         KafkaSpout kafkaSpout = new KafkaSpout();
         MessageBolt messageBolt = new MessageBolt();
-
         TopologyBuilder topologyBuilder = new TopologyBuilder();
-
         topologyBuilder.setSpout(KafkaSpout.class.getSimpleName(), kafkaSpout,2);
         topologyBuilder.setBolt(MessageBolt.class.getSimpleName(), messageBolt, 8)
                 .partialKeyGrouping(KafkaSpout.class.getSimpleName(), new Fields("cors"));

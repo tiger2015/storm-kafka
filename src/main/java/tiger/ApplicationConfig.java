@@ -2,18 +2,17 @@ package tiger;
 
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.*;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.core.ConsumerFactory;
-import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Duration;
+import java.util.*;
 
 @Configuration
 @PropertySource(value = {"classpath:application.properties"})
@@ -54,8 +53,14 @@ public class ApplicationConfig {
     private boolean batchListener;
 
 
-    @Bean
-    public Map<String, Object> consumerConfig() {
+    @Value("${kafka.producer.key.serializer}")
+    private String keySerializer;
+
+    @Value("${kafka.producer.value.serializer}")
+    private String valueSerializer;
+
+
+    private Map<String, Object> consumerConfig() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -68,16 +73,45 @@ public class ApplicationConfig {
         return props;
     }
 
-    @Bean
-    public ConsumerFactory consumerFactory() {
+    private Map<String, Object> producerConfig() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerializer);
+        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerializer);
+        return props;
+    }
+
+    private ConsumerFactory consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfig());
     }
 
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public Consumer kafkaConsumer() {
         Consumer consumer = consumerFactory().createConsumer();
-        consumer.subscribe(Arrays.asList(topics));
+       // consumer.subscribe(Arrays.asList(topics));
+        Map<String, List<PartitionInfo>> map = consumer.listTopics();
+        for (String topic : map.keySet()) {
+            List<PartitionInfo> partitionInfos = map.get(topic);
+            if (!"test".equals(topic)) {
+                continue;
+            }
+            List<TopicPartition> topicPartitions = new ArrayList<>();
+            for (PartitionInfo partitionInfo : partitionInfos) {
+                topicPartitions.add(new TopicPartition(topic, partitionInfo.partition()));
+            }
+            consumer.assign(topicPartitions);
+            consumer.seekToEnd(topicPartitions);
+        }
         return consumer;
     }
+
+    public ProducerFactory producerFactory() {
+        return new DefaultKafkaProducerFactory(producerConfig());
+    }
+
+    @Bean
+    public KafkaTemplate kafkaTemplate() {
+        return new KafkaTemplate(producerFactory());
+    }
+
 }

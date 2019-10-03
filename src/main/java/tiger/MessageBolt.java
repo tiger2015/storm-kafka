@@ -6,6 +6,7 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Tuple;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -17,11 +18,13 @@ public class MessageBolt extends BaseRichBolt {
     private static AtomicLong counter = new AtomicLong(0);
     private TopologyContext context;
     private OutputCollector collector;
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.context = context;
         this.collector = collector;
+        kafkaTemplate = Application.CONTEXT.getBean(KafkaTemplate.class, "kafkaTemplate");
     }
 
     @Override
@@ -31,6 +34,7 @@ public class MessageBolt extends BaseRichBolt {
         log.info("message:" + corsId + "-" + messageKey);
         long count = counter.incrementAndGet();
         log.info("message count:" + count);
+        kafkaTemplate.send("result", "message count", count + "");
     }
 
     @Override

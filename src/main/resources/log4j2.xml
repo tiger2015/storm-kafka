@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="error" interval="30">
+    <Properties>
+        <Property name="log_dir">/log/application</Property>
+        <Property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %class{36} %L %M - %msg%xEx</Property>
+    </Properties>
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <PatternLayout pattern="${pattern}"/>
         </Console>
-        <RollingFile name="RollingFile" fileName="logs/app.log"
-                     filePattern="logs/app-%d{yyyy-MM-dd-HH}.log.gz">
-            <PatternLayout pattern="%d{yyyy-MM-dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n"/>
+        <RollingFile name="RollingFile" fileName="${log.dir}/app.log"
+                     filePattern="${log.dir}/app-%d{yyyy-MM-dd-HH}.log.gz">
+            <PatternLayout pattern="${pattern}"/>
             <TimeBasedTriggeringPolicy/>
         </RollingFile>
     </Appenders>
     <Loggers>
         <Root level="info">
             <Appender-Ref ref="Console"/>
-            <!--<Appender-Ref ref="RollingFile"/>-->
+            <Appender-Ref ref="RollingFile"/>
         </Root>
     </Loggers>
 </Configuration>

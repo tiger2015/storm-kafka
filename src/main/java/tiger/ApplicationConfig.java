@@ -10,7 +10,10 @@ import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,7 +57,6 @@ public class ApplicationConfig {
     private boolean batchListener;
 
 
-    @Bean
     public Map<String, Object> consumerConfig() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
@@ -68,6 +70,7 @@ public class ApplicationConfig {
         return props;
     }
 
+
     @Bean
     public ConsumerFactory consumerFactory() {
         return new DefaultKafkaConsumerFactory<>(consumerConfig());
@@ -80,18 +83,4 @@ public class ApplicationConfig {
         consumer.subscribe(Arrays.asList(topics));
         return consumer;
     }
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory listenerContainerFactory() {
-
-        ConcurrentKafkaListenerContainerFactory containerFactory = new ConcurrentKafkaListenerContainerFactory();
-        containerFactory.setConcurrency(concurrency);
-        containerFactory.setBatchListener(batchListener);
-        containerFactory.setConsumerFactory(consumerFactory());
-        containerFactory.afterPropertiesSet();
-        return containerFactory;
-
-
-    }
-
-
 }

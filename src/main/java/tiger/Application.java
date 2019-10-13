@@ -6,6 +6,8 @@ import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.topology.TopologyBuilder;
+import org.apache.storm.topology.base.BaseRichBolt;
+import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
@@ -18,14 +20,15 @@ public class Application {
 
     public static void main(String[] args) throws InvalidTopologyException, AuthorizationException, AlreadyAliveException {
 
-        BasicKafkaSpout kafkaSpout = new BasicKafkaSpout();
+        //BaseRichSpout kafkaSpout = new BasicKafkaSpout();
+        BaseRichSpout kafkaSpout = new BatchMessageListenerKafkaSpout();
         MessageCountBolt messageCountBolt = new MessageCountBolt();
 
         TopologyBuilder topologyBuilder = new TopologyBuilder();
 
-        topologyBuilder.setSpout(BasicKafkaSpout.class.getSimpleName(), kafkaSpout,2);
+        topologyBuilder.setSpout("kafkaSpout", kafkaSpout,2);
         topologyBuilder.setBolt(MessageCountBolt.class.getSimpleName(), messageCountBolt, 4)
-                .partialKeyGrouping(BasicKafkaSpout.class.getSimpleName(), new Fields("cors"));
+                .partialKeyGrouping("kafkaSpout", new Fields("cors"));
         Config config = new Config();
         config.setNumWorkers(2);
         StormSubmitter.submitTopology("message-count", config, topologyBuilder.createTopology());

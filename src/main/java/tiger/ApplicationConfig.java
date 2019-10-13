@@ -6,15 +6,15 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.storm.kafka.spout.KafkaSpout;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
+import org.springframework.kafka.listener.ContainerProperties;
 
 import java.util.*;
 
@@ -60,6 +60,9 @@ public class ApplicationConfig {
     @Value("${kafka.consumer.time-offset.ms}")
     private long timeOffsetInMills;
 
+    @Value("${kafka.consumer.poll.timeout.ms}")
+    private long pollTimeout;
+
     @Bean
     public Map<String, Object> consumerConfig() {
         Map<String, Object> props = new HashMap<>();
@@ -80,6 +83,7 @@ public class ApplicationConfig {
     }
 
     @Bean
+    @Profile("consumer")
     public Consumer kafkaConsumer() {
         Consumer consumer = consumerFactory().createConsumer();
         List<TopicPartition> topicPartitions = new ArrayList<>();
@@ -114,5 +118,16 @@ public class ApplicationConfig {
         containerFactory.setConsumerFactory(consumerFactory());
         containerFactory.afterPropertiesSet();
         return containerFactory;
+    }
+
+    @Bean
+    public ConcurrentMessageListenerContainer container() {
+        ContainerProperties containerProperties = new ContainerProperties(topics);
+        containerProperties.setPollTimeout(pollTimeout);
+        ConcurrentMessageListenerContainer container = new ConcurrentMessageListenerContainer(consumerFactory(),
+                containerProperties);
+        container.setConcurrency(concurrency);
+        container.setAutoStartup(false); // 不自动启动，不然listener找不到报错
+        return container;
     }
 }

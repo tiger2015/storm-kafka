@@ -14,7 +14,7 @@
     <Loggers>
         <Root level="info">
             <Appender-Ref ref="Console"/>
-            <!--<Appender-Ref ref="RollingFile"/>-->
+            <Appender-Ref ref="RollingFile"/>
         </Root>
     </Loggers>
 </Configuration>

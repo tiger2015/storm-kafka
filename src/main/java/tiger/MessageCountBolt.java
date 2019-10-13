@@ -30,7 +30,7 @@ public class MessageCountBolt extends BaseRichBolt {
         //String messageKey = input.getString(1);
         counterMap.putIfAbsent(corsId, new AtomicLong(0));
         long count = counterMap.get(corsId).addAndGet(1);
-        log.info("message count: " + corsId + "-" + count);
+        log.info("message count: " + corsId + ":" + count);
     }
 
     @Override

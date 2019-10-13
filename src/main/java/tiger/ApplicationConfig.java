@@ -1,24 +1,28 @@
 package tiger;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
+import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Configuration
 @PropertySource(value = {"classpath:application.properties"})
 @ComponentScan(basePackages = {"tiger"})
 @EnableKafka
+@Slf4j
 public class ApplicationConfig {
 
     @Value("${kafka.bootstrap-servers}")
@@ -53,6 +57,8 @@ public class ApplicationConfig {
     @Value("${kafka.consumer.batch-listener}")
     private boolean batchListener;
 
+    @Value("${kafka.consumer.time-offset.ms}")
+    private long timeOffsetInMills;
 
     @Bean
     public Map<String, Object> consumerConfig() {
@@ -74,24 +80,39 @@ public class ApplicationConfig {
     }
 
     @Bean
-    @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public Consumer kafkaConsumer() {
         Consumer consumer = consumerFactory().createConsumer();
-        consumer.subscribe(Arrays.asList(topics));
+        List<TopicPartition> topicPartitions = new ArrayList<>();
+        for (String topic : topics) {
+            List<PartitionInfo> list = consumer.partitionsFor(topic);
+            for (PartitionInfo partitionInfo : list) {
+                log.info("partition info: " + partitionInfo.toString());
+                topicPartitions.add(new TopicPartition(partitionInfo.topic(), partitionInfo.partition()));
+            }
+        }
+        // 分配分区
+        consumer.assign(topicPartitions);
+        // 指定到不同的时间戳进行消费
+        Map<TopicPartition, Long> map = new HashMap<>();
+        topicPartitions.forEach(partition -> map.put(partition, System.currentTimeMillis() - timeOffsetInMills));
+        Map<TopicPartition, OffsetAndTimestamp> offsetsForTimes = consumer.offsetsForTimes(map);
+        offsetsForTimes.forEach((key, value) -> {
+            if (value == null) {
+                consumer.seekToEnd(Arrays.asList(key));
+            } else {
+                consumer.seek(key, value.offset());
+            }
+        });
         return consumer;
     }
+
     @Bean
     public ConcurrentKafkaListenerContainerFactory listenerContainerFactory() {
-
         ConcurrentKafkaListenerContainerFactory containerFactory = new ConcurrentKafkaListenerContainerFactory();
         containerFactory.setConcurrency(concurrency);
         containerFactory.setBatchListener(batchListener);
         containerFactory.setConsumerFactory(consumerFactory());
         containerFactory.afterPropertiesSet();
         return containerFactory;
-
-
     }
-
-
 }

@@ -4,25 +4,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
-import org.apache.kafka.common.TopicPartition;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.listener.ConsumerSeekAware;
-import org.springframework.stereotype.Component;
 
 import java.time.Duration;
-import java.time.temporal.TemporalUnit;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * 基于单消费者处理kafka消息
+ */
 
 @Slf4j
-public class KafkaSpout extends BaseRichSpout {
+public class BasicKafkaSpout extends BaseRichSpout {
     private TopologyContext context;
     private SpoutOutputCollector collector;
     private Consumer consumer;
@@ -46,5 +43,4 @@ public class KafkaSpout extends BaseRichSpout {
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         declarer.declare(new Fields("cors", "message_key"));
     }
-
 }

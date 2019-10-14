@@ -32,8 +32,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @Version 1.0
  **/
 @Slf4j
-public class BatchMessageListenerKafkaSpout extends BaseRichSpout implements BatchMessageListener<String, String>{
-    private static AtomicLong counter = new AtomicLong(0);
+public class BatchMessageListenerKafkaSpout extends BaseRichSpout implements BatchMessageListener<String, String>,
+        ConsumerSeekAware {
     private TopologyContext context;
     private SpoutOutputCollector collector;
 
@@ -65,4 +65,21 @@ public class BatchMessageListenerKafkaSpout extends BaseRichSpout implements Bat
         }
     }
 
+    @Override
+    public void registerSeekCallback(ConsumerSeekCallback callback) {
+
+    }
+
+    @Override
+    public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekCallback callback) {
+        log.info("partition assigned");
+        assignments.forEach((key, value) -> {
+            callback.seekToEnd(key.topic(), key.partition());
+        });
+    }
+
+    @Override
+    public void onIdleContainer(Map<TopicPartition, Long> assignments, ConsumerSeekCallback callback) {
+
+    }
 }

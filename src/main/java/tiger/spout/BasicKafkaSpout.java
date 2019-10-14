@@ -1,4 +1,4 @@
-package tiger;
+package tiger.spout;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
@@ -10,6 +10,7 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
+import tiger.Application;
 
 import java.time.Duration;
 import java.util.Map;

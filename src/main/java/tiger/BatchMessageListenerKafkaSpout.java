@@ -73,9 +73,7 @@ public class BatchMessageListenerKafkaSpout extends BaseRichSpout implements Bat
     @Override
     public void onPartitionsAssigned(Map<TopicPartition, Long> assignments, ConsumerSeekCallback callback) {
         log.info("partition assigned");
-        assignments.forEach((key, value) -> {
-            callback.seekToEnd(key.topic(), key.partition());
-        });
+        assignments.forEach((key, value) -> callback.seekToEnd(key.topic(), key.partition()));
     }
 
     @Override

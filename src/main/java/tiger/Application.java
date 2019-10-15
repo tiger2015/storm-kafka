@@ -20,7 +20,6 @@ public class Application {
 
     public static void main(String[] args) throws InvalidTopologyException, AuthorizationException, AlreadyAliveException {
 
-        //BaseRichSpout kafkaSpout = new BasicKafkaSpout();
         BaseRichSpout kafkaSpout = new BatchMessageListenerKafkaSpout();
         MessageCountBolt messageCountBolt = new MessageCountBolt();
 

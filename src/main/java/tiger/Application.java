@@ -5,6 +5,8 @@ import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.InvalidTopologyException;
+import org.apache.storm.kafka.spout.KafkaSpout;
+import org.apache.storm.kafka.spout.KafkaSpoutConfig;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
@@ -22,17 +24,23 @@ public class Application {
     public static void main(String[] args) throws InvalidTopologyException, AuthorizationException,
             AlreadyAliveException {
 
+        // 直接使用consumer
         //BaseRichSpout kafkaSpout = new BasicKafkaSpout();
-        BaseRichSpout kafkaSpout = new BatchMessageListenerKafkaSpout();
-        MessageCountBolt messageCountBolt = new MessageCountBolt();
 
+        // 在spout中添加消息监听
+        //BaseRichSpout kafkaSpout = new BatchMessageListenerKafkaSpout();
+
+        // 使用外部API
+        KafkaSpoutConfig<String, String> spoutConfig = CONTEXT.getBean(KafkaSpoutConfig.class);
+        BaseRichSpout kafkaSpout = new KafkaSpout(spoutConfig);
+        MessageCountBolt messageCountBolt = new MessageCountBolt();
         TopologyBuilder topologyBuilder = new TopologyBuilder();
 
-        topologyBuilder.setSpout("kafkaSpout", kafkaSpout, 2);
-        topologyBuilder.setBolt(MessageCountBolt.class.getSimpleName(), messageCountBolt, 4)
-                .partialKeyGrouping("kafkaSpout", new Fields("cors"));
+        topologyBuilder.setSpout("kafkaSpout", kafkaSpout, 2).setNumTasks(2);
+        topologyBuilder.setBolt(MessageCountBolt.class.getSimpleName(), messageCountBolt, 2).setNumTasks(2)
+                .fieldsGrouping("kafkaSpout", new Fields("cors"));
         Config config = new Config();
-        config.setNumWorkers(2);
+        config.setNumWorkers(3);
         StormSubmitter.submitTopology("message-count", config, topologyBuilder.createTopology());
         // 本地方式运行
         // LocalCluster cluster = new LocalCluster();

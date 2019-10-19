@@ -36,8 +36,8 @@ public class Application {
         MessageCountBolt messageCountBolt = new MessageCountBolt();
         TopologyBuilder topologyBuilder = new TopologyBuilder();
 
-        topologyBuilder.setSpout("kafkaSpout", kafkaSpout, 2).setNumTasks(2);
-        topologyBuilder.setBolt(MessageCountBolt.class.getSimpleName(), messageCountBolt, 2).setNumTasks(2)
+        topologyBuilder.setSpout("kafkaSpout", kafkaSpout, 8).setNumTasks(8);
+        topologyBuilder.setBolt(MessageCountBolt.class.getSimpleName(), messageCountBolt, 4).setNumTasks(4)
                 .fieldsGrouping("kafkaSpout", new Fields("cors"));
         Config config = new Config();
         config.setNumWorkers(3);

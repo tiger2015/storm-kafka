@@ -1,6 +1,7 @@
 package tiger.spout;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.storm.kafka.spout.RecordTranslator;
 import org.apache.storm.tuple.Fields;
@@ -15,6 +16,7 @@ import java.util.List;
  * @Date 2019/10/15 11:28
  * @Version 1.0
  **/
+@Slf4j
 public class KafkaConsumerRecordTranslator<K, V> implements RecordTranslator<K, V> {
 
     @Override

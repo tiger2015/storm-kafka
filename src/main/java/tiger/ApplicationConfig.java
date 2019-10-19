@@ -1,20 +1,17 @@
 package tiger;
 
-import com.sun.org.apache.regexp.internal.RE;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndTimestamp;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.storm.kafka.spout.FirstPollOffsetStrategy;
-import org.apache.storm.kafka.spout.KafkaSpout;
 import org.apache.storm.kafka.spout.KafkaSpoutConfig;
 import org.apache.storm.kafka.spout.RecordTranslator;
-import org.apache.storm.tuple.Fields;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.*;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -138,7 +135,7 @@ public class ApplicationConfig {
         return consumer;
     }
 
-    @Bean
+   // @Bean
     public ConcurrentKafkaListenerContainerFactory listenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory containerFactory = new ConcurrentKafkaListenerContainerFactory();
         containerFactory.setConcurrency(concurrency);
@@ -148,7 +145,8 @@ public class ApplicationConfig {
         return containerFactory;
     }
 
-    @Bean
+  //  @Bean
+   //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ConcurrentMessageListenerContainer container() {
         ContainerProperties containerProperties = new ContainerProperties(topics);
         containerProperties.setPollTimeout(pollTimeout);
@@ -177,7 +175,7 @@ public class ApplicationConfig {
                         .setProcessingGuarantee(KafkaSpoutConfig.ProcessingGuarantee.AT_MOST_ONCE)
                         .setOffsetCommitPeriodMs(autoCommitIntervalMs)
                         .setPollTimeoutMs(pollTimeout)
-                        .setFirstPollOffsetStrategy(FirstPollOffsetStrategy.LATEST)
+                        .setFirstPollOffsetStrategy(FirstPollOffsetStrategy.EARLIEST)
                         .setProp(ConsumerConfig.GROUP_ID_CONFIG, groupId)
                         .setProp(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializerClass)
                         .setProp(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializerClass)

@@ -34,7 +34,7 @@ public class BasicKafkaSpout extends BaseRichSpout {
 
     @Override
     public void nextTuple() {
-        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
+        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000L));
         for (ConsumerRecord record : records) {
             this.collector.emit(new Values(record.key(), record.value()));
         }

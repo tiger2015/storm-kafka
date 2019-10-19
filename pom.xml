@@ -6,7 +6,11 @@
 
     <groupId>tiger</groupId>
     <artifactId>storm-kafka</artifactId>
+    <packaging>pom</packaging>
     <version>1.1</version>
+    <modules>
+        <module>storm-test</module>
+    </modules>
 
     <name>storm-kafka</name>
     <!-- FIXME change it to the project's website -->
@@ -109,17 +113,15 @@
             </exclusions>
         </dependency>
         <!-- 已经不再使用 -->
-        <dependency>
-            <groupId>org.apache.storm</groupId>
-            <artifactId>storm-kafka</artifactId>
-            <version>1.2.3</version>
-            <!--<scope>provided</scope>-->
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.storm</groupId>-->
+            <!--<artifactId>storm-kafka</artifactId>-->
+            <!--<version>1.2.3</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.storm</groupId>
             <artifactId>storm-kafka-client</artifactId>
             <version>2.0.0</version>
-            <!--<scope>provided</scope>-->
         </dependency>
     </dependencies>
 

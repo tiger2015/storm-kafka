@@ -1,4 +1,4 @@
-package tiger;
+package tiger.bolt;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.storm.task.OutputCollector;
@@ -12,16 +12,21 @@ import java.util.Map;
 @Slf4j
 public class MyBolt extends BaseRichBolt {
 
+    public static final String componentId = MyBolt.class.getSimpleName();
+
     private OutputCollector collector;
+
+    private int taskId;
 
     @Override
     public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
+        taskId = context.getThisTaskId();
     }
 
     @Override
     public void execute(Tuple input) {
-        log.info("receive:" + input.getString(1));
+        log.info("task-" + taskId + " receive:" + input.getString(1));
     }
 
     @Override

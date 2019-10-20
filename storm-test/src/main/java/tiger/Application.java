@@ -5,37 +5,58 @@ import org.apache.storm.StormSubmitter;
 import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.AuthorizationException;
 import org.apache.storm.generated.InvalidTopologyException;
-import org.apache.storm.generated.StormTopology;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
+import tiger.bolt.MyBolt;
+import tiger.firstmessagespout.FirstMessageSpout01;
+import tiger.firstmessagespout.FirstMessageSpout02;
+import tiger.firstmessagespout.FirstMessageSpout03;
+import tiger.secondmessageSpout.SecondMessageSpout;
 
 /**
- * Hello world!
- */
+ * @ClassName Application
+ * @Description TODO
+ * @Author zeng.h
+ * @Date 2019/10/19 9:55
+ * @Version 1.0
+ **/
 public class Application {
-    public static void main(String[] args) throws InvalidTopologyException, AuthorizationException, AlreadyAliveException {
 
-        MyFirstSpout firstSpout = new MyFirstSpout();
-        MySecondSpout secondSpout = new MySecondSpout();
+
+    public static void main(String[] args) throws InvalidTopologyException, AuthorizationException,
+            AlreadyAliveException {
+
+
+        FirstMessageSpout01 firstMessageSpout01 = new FirstMessageSpout01();
+
+        FirstMessageSpout02 firstMessageSpout02 = new FirstMessageSpout02();
+
+        FirstMessageSpout03 firstMessageSpout03 = new FirstMessageSpout03();
+
+        SecondMessageSpout secondMessageSpout = new SecondMessageSpout();
+
 
         MyBolt myBolt = new MyBolt();
 
+
         TopologyBuilder topologyBuilder = new TopologyBuilder();
 
-        topologyBuilder.setSpout(MyFirstSpout.class.getSimpleName(), firstSpout, 4).setNumTasks(4);
+        topologyBuilder.setSpout(FirstMessageSpout01.componentId, firstMessageSpout01, 1).setNumTasks(1);
 
-        topologyBuilder.setSpout(MySecondSpout.class.getSimpleName(), secondSpout, 4).setNumTasks(4);
+        topologyBuilder.setSpout(FirstMessageSpout02.componentId, firstMessageSpout02, 1).setNumTasks(1);
 
-        topologyBuilder.setBolt(MyBolt.class.getSimpleName(), myBolt, 4)
-                .setNumTasks(4)
-                .fieldsGrouping(MyFirstSpout.class.getSimpleName(), new Fields("id"))
-                .fieldsGrouping(MySecondSpout.class.getSimpleName(), new Fields("id"));
+        topologyBuilder.setSpout(FirstMessageSpout03.componentId, firstMessageSpout03, 1).setNumTasks(1);
 
+        topologyBuilder.setSpout(SecondMessageSpout.componentId, secondMessageSpout, 1).setNumTasks(1);
+
+        topologyBuilder.setBolt(MyBolt.componentId, myBolt, 4).setNumTasks(4)
+                .fieldsGrouping(FirstMessageSpout01.componentId, new Fields("id"))
+                .fieldsGrouping(FirstMessageSpout02.componentId, new Fields("id"))
+                .fieldsGrouping(FirstMessageSpout03.componentId, new Fields("id"))
+                .fieldsGrouping(SecondMessageSpout.componentId, new Fields("id"));
         Config config = new Config();
         config.setNumWorkers(3);
-        // 全局设置一个时间间隔 但是时间小的优先级最高
-        //config.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, 1);
-        StormTopology topology = topologyBuilder.createTopology();
-        StormSubmitter.submitTopology("test", config, topology);
+        StormSubmitter.submitTopology("test", config, topologyBuilder.createTopology());
     }
+
 }

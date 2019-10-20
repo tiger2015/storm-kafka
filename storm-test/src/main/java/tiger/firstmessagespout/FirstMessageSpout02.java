@@ -1,6 +1,5 @@
-package tiger;
+package tiger.firstmessagespout;
 
-import org.apache.storm.Config;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -11,7 +10,9 @@ import org.apache.storm.tuple.Values;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class MySecondSpout extends BaseRichSpout {
+public class FirstMessageSpout02 extends BaseRichSpout {
+
+    public static final String componentId = FirstMessageSpout02.class.getSimpleName();
 
     private SpoutOutputCollector collector;
 
@@ -23,23 +24,12 @@ public class MySecondSpout extends BaseRichSpout {
 
     @Override
     public void nextTuple() {
-        long current = System.currentTimeMillis() / 1000L;
-        for (int i = 0; i < 1; i++) {
-            collector.emit(new Values(i, "second-message-" + i + "-" + current));
-        }
+        sendMessage();
     }
 
     @Override
     public void declareOutputFields(OutputFieldsDeclarer declarer) {
         declarer.declare(new Fields("id", "message"));
-    }
-
-
-    @Override
-    public Map<String, Object> getComponentConfiguration() {
-        Config config = new Config();
-        config.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, 1);
-        return config;
     }
 
 
@@ -49,16 +39,21 @@ public class MySecondSpout extends BaseRichSpout {
         @Override
         public void run() {
             while (true) {
-                try {
-                    long current = System.currentTimeMillis() / 1000L;
-                    for (int i = 0; i < 1; i++) {
-                        collector.emit(new Values(i, "second-message-" + i + "-" + current));
-                    }
-                    TimeUnit.SECONDS.sleep(1L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                sendMessage();
             }
+        }
+    }
+
+    private void sendMessage() {
+        try {
+            long current = System.currentTimeMillis() / 1000L;
+            for (int i = 0; i < 100; i++) {
+                if (i % 6 == 1 || i % 6 == 4)
+                    collector.emit(new Values(i, "first-message-" + i + "-" + current));
+            }
+            TimeUnit.SECONDS.sleep(1L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

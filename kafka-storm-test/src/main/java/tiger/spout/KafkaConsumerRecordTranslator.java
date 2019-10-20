@@ -26,6 +26,6 @@ public class KafkaConsumerRecordTranslator<K, V> implements RecordTranslator<K, 
 
     @Override
     public Fields getFieldsFor(String stream) {
-        return new Fields("cors", "message_key");
+        return new Fields("id", "message");
     }
 }

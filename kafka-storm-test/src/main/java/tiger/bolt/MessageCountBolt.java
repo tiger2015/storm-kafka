@@ -33,10 +33,10 @@ public class MessageCountBolt extends BaseRichBolt {
     @Override
     public void execute(Tuple input) {
         String corsId = input.getString(0);
-        //String messageKey = input.getString(1);
+        String message = input.getString(1);
+        log.info("receive:" + corsId + "," + message);
         counterMap.putIfAbsent(corsId, new AtomicLong(0));
         long count = counterMap.get(corsId).addAndGet(1);
-//        log.info("message count: " + corsId + ":" + count);
         kafkaProducerService.sendMessage("result", corsId, count + "");
     }
 

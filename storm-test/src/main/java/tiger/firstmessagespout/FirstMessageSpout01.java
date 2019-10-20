@@ -1,6 +1,6 @@
-package tiger;
+package tiger.firstmessagespout;
 
-import org.apache.storm.Config;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
@@ -11,7 +11,11 @@ import org.apache.storm.tuple.Values;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-public class MyFirstSpout extends BaseRichSpout {
+@Slf4j
+public class FirstMessageSpout01 extends BaseRichSpout {
+
+
+    public static final String componentId = FirstMessageSpout01.class.getSimpleName();
 
     private SpoutOutputCollector collector;
 
@@ -23,10 +27,7 @@ public class MyFirstSpout extends BaseRichSpout {
 
     @Override
     public void nextTuple() {
-        long current = System.currentTimeMillis() / 1000L;
-        for (int i = 0; i < 1; i++) {
-            collector.emit(new Values(i, "first-message-" + i + "-" + current));
-        }
+        sendMessage();
     }
 
 
@@ -36,28 +37,28 @@ public class MyFirstSpout extends BaseRichSpout {
     }
 
 
-    @Override
-    public Map<String, Object> getComponentConfiguration() {
-        Config config = new Config();
-        config.put(Config.TOPOLOGY_TICK_TUPLE_FREQ_SECS, 1);
-        return config;
-    }
-
     private class MyThread implements Runnable {
 
         @Override
         public void run() {
             while (true) {
-                try {
-                    long current = System.currentTimeMillis() / 1000L;
-                    for (int i = 0; i < 1; i++) {
-                        collector.emit(new Values(i, "first-message-" + i + "-" + current));
-                    }
-                    TimeUnit.SECONDS.sleep(1L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                sendMessage();
             }
         }
     }
+
+    private void sendMessage() {
+        try {
+            long current = System.currentTimeMillis() / 1000L;
+            for (int i = 0; i < 100; i++) {
+                if (i % 6 == 0 || i % 6 == 3) {
+                    collector.emit(new Values(i, "first-message-" + i + "-" + current));
+                }
+            }
+            TimeUnit.SECONDS.sleep(1L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }

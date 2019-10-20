@@ -11,7 +11,6 @@ import org.apache.storm.kafka.spout.FirstPollOffsetStrategy;
 import org.apache.storm.kafka.spout.KafkaSpoutConfig;
 import org.apache.storm.kafka.spout.RecordTranslator;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.*;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
@@ -135,7 +134,7 @@ public class ApplicationConfig {
         return consumer;
     }
 
-   // @Bean
+    // @Bean
     public ConcurrentKafkaListenerContainerFactory listenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory containerFactory = new ConcurrentKafkaListenerContainerFactory();
         containerFactory.setConcurrency(concurrency);
@@ -145,8 +144,8 @@ public class ApplicationConfig {
         return containerFactory;
     }
 
-  //  @Bean
-   //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+    //  @Bean
+    //@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
     public ConcurrentMessageListenerContainer container() {
         ContainerProperties containerProperties = new ContainerProperties(topics);
         containerProperties.setPollTimeout(pollTimeout);
@@ -175,7 +174,7 @@ public class ApplicationConfig {
                         .setProcessingGuarantee(KafkaSpoutConfig.ProcessingGuarantee.AT_MOST_ONCE)
                         .setOffsetCommitPeriodMs(autoCommitIntervalMs)
                         .setPollTimeoutMs(pollTimeout)
-                        .setFirstPollOffsetStrategy(FirstPollOffsetStrategy.EARLIEST)
+                        .setFirstPollOffsetStrategy(FirstPollOffsetStrategy.LATEST)
                         .setProp(ConsumerConfig.GROUP_ID_CONFIG, groupId)
                         .setProp(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, keyDeserializerClass)
                         .setProp(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, valueDeserializerClass)

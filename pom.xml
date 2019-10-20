@@ -5,11 +5,12 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>tiger</groupId>
-    <artifactId>storm-kafka</artifactId>
+    <artifactId>storm-projects</artifactId>
     <packaging>pom</packaging>
     <version>1.1</version>
     <modules>
         <module>storm-test</module>
+        <module>kafka-storm-test</module>
     </modules>
 
     <name>storm-kafka</name>
@@ -114,9 +115,9 @@
         </dependency>
         <!-- 已经不再使用 -->
         <!--<dependency>-->
-            <!--<groupId>org.apache.storm</groupId>-->
-            <!--<artifactId>storm-kafka</artifactId>-->
-            <!--<version>1.2.3</version>-->
+        <!--<groupId>org.apache.storm</groupId>-->
+        <!--<artifactId>storm-kafka</artifactId>-->
+        <!--<version>1.2.3</version>-->
         <!--</dependency>-->
         <dependency>
             <groupId>org.apache.storm</groupId>
@@ -124,45 +125,6 @@
             <version>2.0.0</version>
         </dependency>
     </dependencies>
-
-
     <build>
-        <finalName>${name}-${version}</finalName>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>tiger.Application</mainClass>
-                                </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.handlers</resource>
-                                </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-                                    <resource>META-INF/spring.schemas</resource>
-                                </transformer>
-                            </transformers>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
 </project>

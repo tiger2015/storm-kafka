@@ -8,10 +8,10 @@ import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
 import tiger.bolt.MyBolt;
-import tiger.firstmessagespout.FirstMessageSpout01;
-import tiger.firstmessagespout.FirstMessageSpout02;
-import tiger.firstmessagespout.FirstMessageSpout03;
-import tiger.secondmessageSpout.SecondMessageSpout;
+import tiger.spout.FirstMessageSpout;
+import tiger.spout.SecondMessageSpout;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @ClassName Application
@@ -22,41 +22,37 @@ import tiger.secondmessageSpout.SecondMessageSpout;
  **/
 public class Application {
 
+    public static final AtomicLong INDEX = new AtomicLong(0);
 
     public static void main(String[] args) throws InvalidTopologyException, AuthorizationException,
             AlreadyAliveException {
 
 
-        FirstMessageSpout01 firstMessageSpout01 = new FirstMessageSpout01();
+        FirstMessageSpout firstMessageSpout01 = new FirstMessageSpout("firsMessageSpout-1", 1, 10);
+        FirstMessageSpout firstMessageSpout02 = new FirstMessageSpout("firsMessageSpout-2", 11, 20);
+        FirstMessageSpout firstMessageSpout03 = new FirstMessageSpout("firsMessageSpout-3", 21, 30);
 
-        FirstMessageSpout02 firstMessageSpout02 = new FirstMessageSpout02();
-
-        FirstMessageSpout03 firstMessageSpout03 = new FirstMessageSpout03();
-
-        SecondMessageSpout secondMessageSpout = new SecondMessageSpout();
-
+        SecondMessageSpout secondMessageSpout01 = new SecondMessageSpout("secondMessageSpout-1", 1, 15);
+        SecondMessageSpout secondMessageSpout02 = new SecondMessageSpout("secondMessageSpout-2", 16, 31);
 
         MyBolt myBolt = new MyBolt();
 
-
         TopologyBuilder topologyBuilder = new TopologyBuilder();
+        topologyBuilder.setSpout(firstMessageSpout01.componentId, firstMessageSpout01, 1).setNumTasks(1);
+        topologyBuilder.setSpout(firstMessageSpout02.componentId, firstMessageSpout02, 1).setNumTasks(1);
+        topologyBuilder.setSpout(firstMessageSpout03.componentId, firstMessageSpout03, 1).setNumTasks(1);
 
-        topologyBuilder.setSpout(FirstMessageSpout01.componentId, firstMessageSpout01, 1).setNumTasks(1);
-
-        topologyBuilder.setSpout(FirstMessageSpout02.componentId, firstMessageSpout02, 1).setNumTasks(1);
-
-        topologyBuilder.setSpout(FirstMessageSpout03.componentId, firstMessageSpout03, 1).setNumTasks(1);
-
-        topologyBuilder.setSpout(SecondMessageSpout.componentId, secondMessageSpout, 1).setNumTasks(1);
+        topologyBuilder.setSpout(secondMessageSpout01.componentId, secondMessageSpout01, 1).setNumTasks(1);
+        topologyBuilder.setSpout(secondMessageSpout02.componentId, secondMessageSpout02, 1).setNumTasks(1);
 
         topologyBuilder.setBolt(MyBolt.componentId, myBolt, 4).setNumTasks(4)
-                .fieldsGrouping(FirstMessageSpout01.componentId, new Fields("id"))
-                .fieldsGrouping(FirstMessageSpout02.componentId, new Fields("id"))
-                .fieldsGrouping(FirstMessageSpout03.componentId, new Fields("id"))
-                .fieldsGrouping(SecondMessageSpout.componentId, new Fields("id"));
+                .fieldsGrouping(firstMessageSpout01.componentId, new Fields("id"))
+                .fieldsGrouping(firstMessageSpout02.componentId, new Fields("id"))
+                .fieldsGrouping(firstMessageSpout03.componentId, new Fields("id"))
+                .fieldsGrouping(secondMessageSpout01.componentId, new Fields("id"))
+                .fieldsGrouping(secondMessageSpout02.componentId, new Fields("id"));
         Config config = new Config();
         config.setNumWorkers(3);
         StormSubmitter.submitTopology("test", config, topologyBuilder.createTopology());
     }
-
 }

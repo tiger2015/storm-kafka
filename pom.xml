@@ -13,7 +13,7 @@
         <module>kafka-storm-test</module>
     </modules>
 
-    <name>storm-kafka</name>
+    <name>storm-projects</name>
     <!-- FIXME change it to the project's website -->
     <url>http://www.example.com</url>
 

@@ -9,7 +9,7 @@
     <packaging>pom</packaging>
     <version>1.1</version>
     <modules>
-        <module>storm-test</module>
+        <module>storm-grouping-test</module>
         <module>kafka-storm-test</module>
     </modules>
 

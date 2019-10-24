@@ -26,7 +26,13 @@ public class Application {
 
     public static void main(String[] args) throws InvalidTopologyException, AuthorizationException,
             AlreadyAliveException {
-
+        if(args.length != 2){
+            System.out.println("input error");
+            System.out.println("input format [topology name] [worker number]");
+            System.exit(0);
+        }
+        String topologyName = args[0];
+        int workerNumber = Integer.parseInt(args[1]);
 
         FirstMessageSpout firstMessageSpout01 = new FirstMessageSpout("firsMessageSpout-1", 1, 10);
         FirstMessageSpout firstMessageSpout02 = new FirstMessageSpout("firsMessageSpout-2", 11, 20);
@@ -52,7 +58,8 @@ public class Application {
                 .fieldsGrouping(secondMessageSpout01.componentId, new Fields("id"))
                 .fieldsGrouping(secondMessageSpout02.componentId, new Fields("id"));
         Config config = new Config();
-        config.setNumWorkers(3);
-        StormSubmitter.submitTopology("test", config, topologyBuilder.createTopology());
+        config.setNumWorkers(workerNumber);
+        config.setNumAckers(0);
+        StormSubmitter.submitTopology(topologyName, config, topologyBuilder.createTopology());
     }
 }
